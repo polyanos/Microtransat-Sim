@@ -1,4 +1,4 @@
-from SimPyLC import *
+from simpylc import *
 
 
 class Visualisation (Scene):
