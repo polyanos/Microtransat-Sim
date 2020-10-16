@@ -34,8 +34,8 @@ class Visualisation (Scene):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z))
 
         self.camera(
-            position=tEva((world.sailboat.position_x + 4,  world.sailboat.position_y, world.sailboat.position_z + 1.5)),
-            focus=tEva((world.sailboat.position_x - 1,  world.sailboat.position_y, world.sailboat.position_z))
+            position=tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 2.5)),
+            focus=tEva((world.sailboat.position_x + 0.00001,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.hull(
@@ -46,7 +46,7 @@ class Visualisation (Scene):
                 self.mast(
                     parts=lambda:
                         self.gimbal(
-                            rotation=world.sailboat.sail_angle,
+                            rotation=world.sailboat.local_sail_angle,
                             parts=lambda:
                                 self.boom(
                                     parts=lambda:

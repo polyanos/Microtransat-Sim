@@ -12,24 +12,28 @@ class Sailboat (Module):
         self.position_y = Register()
         self.position_z = Register()
 
-        self.group('wind vane')
-        self.wind_vane_angle = Register()
-
         self.group('sail')
         self.target_sail_angle = Register(0)
-        self.sail_angle = Register(0)
+        self.local_sail_angle = Register(0)
+        self.global_sail_angle = Register(self.local_sail_angle)
 
     def input(self):
         self.part('target sail angle')
         self.target_sail_angle.set(world.control.target_sail_angle)
 
     def sweep(self):
-        self.position_x.set(self.position_x - world.control.movement_speed)
+        if self.local_sail_angle > self.target_sail_angle:
+            self.local_sail_angle.set(self.local_sail_angle - 1)
 
-        if self.sail_angle > self.target_sail_angle:
-            self.sail_angle.set(self.sail_angle - 1)
+        if self.local_sail_angle < self.target_sail_angle:
+            self.local_sail_angle.set(self.local_sail_angle + 1)
 
-        if self.sail_angle < self.target_sail_angle:
-            self.sail_angle.set(self.sail_angle + 1)
+        self.global_sail_angle.set((self.local_sail_angle - 90) % 360)
 
-        self.wind_vane_angle.set(self.wind_vane_angle + 1)
+        perpendicular_angle = self.local_sail_angle % 360
+        alpha = abs(perpendicular_angle - world.wind.wind_direction)
+
+        perpendicular_thrust = math.cos(alpha) * perpendicular_angle
+        print(math.cos(math.radians(alpha)) * world.wind.wind_scalar)
+
+
