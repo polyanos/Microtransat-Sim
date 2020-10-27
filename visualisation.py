@@ -12,6 +12,11 @@ class Visualisation (Scene):
         self.hull = Beam(size=(1, 0.4, 0.15), center=(0, 0, 0), color=hull_color)
         self.nose = Beam(size=(0.275, 0.275, 0.15), center=(-0.5, 0, 0), angle=45, color=hull_color)
         self.rear = Cylinder(size=(0.4, 0.4, 0.15), center=(0.5, 0, 0), color=hull_color)
+        
+        # Rudder
+        rudder_color = (1, 1, 1)
+        self.rudder = Beam(size=(0.4, 0.05, 1.5), center=(0.08, 0, -0.77), color=rudder_color)
+        self.gimbal_rudder = Ellipsoid(size=3 * (0.05,), center=(0.7, 0, -0.10), pivot=(0, 0, 1), color=rudder_color)
 
         # Sail
         mast_color = (1, 1, 1)
@@ -41,6 +46,13 @@ class Visualisation (Scene):
         self.hull(
             position=sailboat_position,
             parts=lambda:
+                self.gimbal_rudder(
+                    rotation=world.sailboat.gimbal_rudder_angle,
+                    parts=lambda:
+                        self.rudder()
+                            
+                            
+                    )+    
                 self.nose() +
                 self.rear() +
                 self.mast(
