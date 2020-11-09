@@ -45,6 +45,7 @@ class Visualisation (Scene):
 
         self.hull(
             position=sailboat_position,
+            rotation=world.sailboat.sailboat_rotation,
             parts=lambda:
                 self.gimbal_rudder(
                     rotation=world.sailboat.gimbal_rudder_angle,
