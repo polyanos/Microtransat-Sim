@@ -11,6 +11,9 @@ class Sailboat (Module):
         self.position_x = Register()
         self.position_y = Register()
         self.position_z = Register()
+        
+        self.group('rotation', True)
+        self.sailboat_rotation = Register()  
 
         self.group('wind vane')
         self.wind_vane_angle = Register()
@@ -23,7 +26,15 @@ class Sailboat (Module):
         self.target_gimbal_rudder_angle = Register(0)
         self.gimbal_rudder_angle = Register(0)
         
-
+        self.group('fake speed')
+        self.fake_speed = Register(0)
+        
+        self.group('rudder forces')
+        self.drag_force =Register(0)
+        self.perpendicular_force = Register(0)
+        self.forward_force = Register(0)
+        
+       
     def input(self):
         self.part('target sail angle')
         self.target_sail_angle.set(world.control.target_sail_angle)
@@ -47,3 +58,9 @@ class Sailboat (Module):
          
         if self.gimbal_rudder_angle < self.target_gimbal_rudder_angle:
             self.gimbal_rudder_angle.set(self.gimbal_rudder_angle + 1)
+            
+        if self.perpendicular_force.set(self.drag_force / cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
+            self.perpendicular_force % 360
+            
+        if self.forward_force.set(self.fake_speed * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
+            self.forward_force % 360
