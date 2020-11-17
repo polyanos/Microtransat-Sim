@@ -1,4 +1,4 @@
-from SimPyLC import *
+from simpylc import *
 
 
 class Visualisation (Scene):
@@ -7,11 +7,23 @@ class Visualisation (Scene):
 
         self.camera = Camera()
 
+        # Waypoint
+
+        waypointColor = (1,0,0)
+        
+        self.wayPointMarker = Beam(size=(1,1,1), center=(-25,0,0), color=waypointColor)
+        self.wayPointMarker2 = Beam(size=(1,1,1), center=(-50,-25,0), color=waypointColor)
+
         # Hull
         hull_color = (1, 1, 1)
         self.hull = Beam(size=(1, 0.4, 0.15), center=(0, 0, 0), color=hull_color)
         self.nose = Beam(size=(0.275, 0.275, 0.15), center=(-0.5, 0, 0), angle=45, color=hull_color)
         self.rear = Cylinder(size=(0.4, 0.4, 0.15), center=(0.5, 0, 0), color=hull_color)
+        
+        # Rudder
+        rudder_color = (1, 1, 1)
+        self.rudder = Beam(size=(0.4, 0.05, 0.75), center=(0.08, 0, -0.3), color=rudder_color)
+        self.gimbal_rudder = Ellipsoid(size=3 * (0.05,), center=(0.7, 0, -0.10), pivot=(0, 0, 1), color=rudder_color)
 
         # Sail
         mast_color = (1, 1, 1)
@@ -30,17 +42,27 @@ class Visualisation (Scene):
         water_color = (0, 0.025, 1)
         self.ocean = Beam(size=(100, 100, 0.005), center=(0, 0, -0.5), color=water_color)
 
+        
+
     def display(self):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z))
 
         self.camera(
-            position=tEva((world.sailboat.position_x + 4,  world.sailboat.position_y, world.sailboat.position_z + 1.5)),
+            position=tEva((world.sailboat.position_x + 4,  world.sailboat.position_y, world.sailboat.position_z + 20)), #x backview, y ?? , z height
             focus=tEva((world.sailboat.position_x - 1,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.hull(
             position=sailboat_position,
+            rotation=world.sailboat.sailboat_rotation,
             parts=lambda:
+                self.gimbal_rudder(
+                    rotation=world.sailboat.gimbal_rudder_angle,
+                    parts=lambda:
+                        self.rudder()
+                            
+                            
+                    )+    
                 self.nose() +
                 self.rear() +
                 self.mast(
@@ -64,3 +86,4 @@ class Visualisation (Scene):
         )
 
         self.ocean()
+        self.wayPointMarker()

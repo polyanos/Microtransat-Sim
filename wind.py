@@ -1,6 +1,6 @@
 import random
 
-from SimPyLC import *
+from simpylc import *
 
 
 class Wind (Module):
