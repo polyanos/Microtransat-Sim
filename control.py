@@ -28,5 +28,3 @@ class Control(Module):
         
         if self.target_gimbal_rudder_angle < -45:
             self.target_gimbal_rudder_angle.set(-45)
-
-        

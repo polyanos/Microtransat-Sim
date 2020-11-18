@@ -19,17 +19,13 @@ class Sailboat (Module):
         self.target_sail_angle = Register(0)
         self.local_sail_angle = Register(0)
         self.global_sail_angle = Register(self.local_sail_angle)
-
         
         self.group('gimbal rudder')
         self.target_gimbal_rudder_angle = Register(0)
         self.gimbal_rudder_angle = Register(0)
         
-        self.group('fake speed')
-        self.fake_speed = Register(0)
-        
         self.group('rudder forces')
-        self.drag_force =Register(0)
+        self.drag_force = Register(0)
         self.perpendicular_force = Register(0)
         self.forward_force = Register(0)
 
@@ -46,30 +42,31 @@ class Sailboat (Module):
 
         if self.local_sail_angle < self.target_sail_angle:
             self.local_sail_angle.set(self.local_sail_angle + 1)
-
-        self.global_sail_angle.set((self.local_sail_angle - 90) % 360)
-
-        perpendicular_angle = self.local_sail_angle % 360
-        alpha = abs(perpendicular_angle - world.wind.wind_direction)
-        perpendicular_thrust = math.cos(math.radians(alpha)) * world.wind.wind_scalar
-        forward_thrust = math.sin(math.radians(45)) * perpendicular_thrust
-
         
         if self.gimbal_rudder_angle > self.target_gimbal_rudder_angle:
             self.gimbal_rudder_angle.set(self.gimbal_rudder_angle - 1)
          
         if self.gimbal_rudder_angle < self.target_gimbal_rudder_angle:
             self.gimbal_rudder_angle.set(self.gimbal_rudder_angle + 1)
+
+        self.global_sail_angle.set((self.sailboat_rotation + self.local_sail_angle) % 360)
+        alpha = abs(self.global_sail_angle - world.wind.wind_direction)
+        perpendicular_thrust = math.cos(math.radians(alpha)) * world.wind.wind_scalar
+        forward_thrust = math.sin(math.radians(45)) * perpendicular_thrust
             
         if self.perpendicular_force.set(self.drag_force / cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
             self.perpendicular_force % 360
-            
-        if self.forward_force.set(self.fake_speed * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
-            self.forward_force % 360
 
+        # TODO: Discuss
+        # if self.forward_force.set(forward_thrust * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
+        #     self.forward_force % 360
+
+        # TODO: Discuss
         if self.gimbal_rudder_angle < 90:
-            self.sailboat_rotation += 0.05*(self.gimbal_rudder_angle)
+            self.sailboat_rotation += (0.01*forward_thrust)*self.gimbal_rudder_angle
         else:
             self.gimbal_rudder_angle.set(90)
+
+        print(forward_thrust)
             
 

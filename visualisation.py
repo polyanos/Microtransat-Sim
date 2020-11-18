@@ -53,7 +53,7 @@ class Visualisation (Scene):
                         self.rudder()
                             
                             
-                    )+    
+                    ) +
                 self.nose() +
                 self.rear() +
                 self.mast(
