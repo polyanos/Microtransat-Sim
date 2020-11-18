@@ -51,6 +51,8 @@ class Sailboat (Module):
         if self.sail_angle < self.target_sail_angle:
             self.sail_angle.set(self.sail_angle + 1)
 
+        #self.sailboat_rotation.set(self.gimbal_rudder_angle + world.control.movement_speed)
+
         self.wind_vane_angle.set(self.wind_vane_angle + 1)
         
         if self.gimbal_rudder_angle > self.target_gimbal_rudder_angle:
@@ -64,3 +66,16 @@ class Sailboat (Module):
             
         if self.forward_force.set(self.fake_speed * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
             self.forward_force % 360
+
+        if self.gimbal_rudder_angle < 90:
+            self.sailboat_rotation += 0.05*(self.gimbal_rudder_angle)
+        else:
+            self.gimbal_rudder_angle.set(90)
+            
+        # if self.distanceToWaypoint()[0] < 5 and self.distanceToWaypoint()[1] < 5:
+        #     #world.control.movement_speed = 0.0
+        #     #print("reached waypoint radius")
+        # else: 
+        #     tempVane = self.wind_vane_angle
+        #     # print("speed: ", world.control.movement_speed)
+        #     # print("wind direction is ", tempVane+0)

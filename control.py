@@ -8,7 +8,7 @@ class Control(Module):
         self.page('sailboat movement control')
 
         self.group('control', True)
-        self.movement_speed = Register()
+        self.movement_speed = Register(0)
 
         self.group('sail')
         self.target_sail_angle = Register()
@@ -17,6 +17,7 @@ class Control(Module):
         self.target_gimbal_rudder_angle = Register()
 
     def sweep(self):
+        #self.movement_speed = 0.1
         if self.target_sail_angle > 90:
             self.target_sail_angle.set(90)
 
@@ -28,3 +29,5 @@ class Control(Module):
         
         if self.target_gimbal_rudder_angle < -45:
             self.target_gimbal_rudder_angle.set(-45)
+
+        
