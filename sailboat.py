@@ -32,8 +32,7 @@ class Sailboat (Module):
 
         perpendicular_angle = self.local_sail_angle % 360
         alpha = abs(perpendicular_angle - world.wind.wind_direction)
-
-        perpendicular_thrust = math.cos(alpha) * perpendicular_angle
-        print(math.cos(math.radians(alpha)) * world.wind.wind_scalar)
+        perpendicular_thrust = math.cos(math.radians(alpha)) * world.wind.wind_scalar
+        forward_thrust = math.sin(math.radians(45)) * perpendicular_thrust
 
 
