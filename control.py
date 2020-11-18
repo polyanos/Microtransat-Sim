@@ -7,11 +7,8 @@ class Control(Module):
 
         self.page('sailboat movement control')
 
-        self.group('control', True)
-        self.movement_speed = Register()
-
-        self.group('sail')
-        self.target_sail_angle = Register()
+        self.group('sail', True)
+        self.target_sail_angle = Register(20)
 
     def sweep(self):
         if self.target_sail_angle > 90:

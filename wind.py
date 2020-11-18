@@ -1,5 +1,3 @@
-import random
-
 from simpylc import *
 
 
@@ -15,9 +13,4 @@ class Wind (Module):
 
     def sweep(self):
         self.wind_direction.set(self.wind_direction + random.uniform(-1, 1))
-
-        while self.wind_direction >= 360:
-            self.wind_direction.set(self.wind_direction - 360)
-
-        while self.wind_direction < 0:
-            self.wind_direction.set(self.wind_direction + 360)
+        self.wind_direction.set(self.wind_direction % 360)
