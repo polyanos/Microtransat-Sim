@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 PyOpenGL-3.1.5-cp38-cp38-win_amd64.whl
+# JetBrains stuff
+.idea/
