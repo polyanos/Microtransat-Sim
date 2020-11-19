@@ -6,14 +6,9 @@ class Visualisation (Scene):
         Scene.__init__(self)
 
         self.camera = Camera()
-
         # Waypoint
-
         waypointColor = (1,0,0)
-        
-        self.wayPointMarker = Beam(size=(1,1,1), center=(-25,0,0), color=waypointColor)
-        self.wayPointMarker2 = Beam(size=(1,1,1), center=(-50,-25,0), color=waypointColor)
-
+        self.wayPointMarker = Beam(size=(1,1,1), center=(25,0,0), color=waypointColor)
         # Hull
         hull_color = (1, 1, 1)
         self.hull = Beam(size=(1, 0.4, 0.15), center=(0, 0, 0), color=hull_color)
@@ -48,13 +43,13 @@ class Visualisation (Scene):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z))
 
         self.camera(
-            position=tEva((world.sailboat.position_x + 4,  world.sailboat.position_y, world.sailboat.position_z + 20)), #x backview, y ?? , z height
-            focus=tEva((world.sailboat.position_x - 1,  world.sailboat.position_y, world.sailboat.position_z))
+            position=tEva((world.sailboat.position_x + 3,  world.sailboat.position_y +1, world.sailboat.position_z + 20)),
+            focus=tEva((world.sailboat.position_x + 0.00001,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.hull(
             position=sailboat_position,
-            rotation=world.sailboat.sailboat_rotation,
+            rotation=world.sailboat.sailboat_rotation + 180,
             parts=lambda:
                 self.gimbal_rudder(
                     rotation=world.sailboat.gimbal_rudder_angle,

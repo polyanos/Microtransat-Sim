@@ -1,7 +1,14 @@
 from control import Control
 from visualisation import Visualisation
 from simpylc import *
+from enum import Enum
+from math import *
 
+class CompassDirection(Enum):
+    NORTH = 0
+    EAST = 90
+    SOUTH = 180
+    WEST = 270
 
 class Sailboat (Module):
     def __init__(self ):
@@ -35,8 +42,32 @@ class Sailboat (Module):
         self.drag_force =Register(0)
         self.perpendicular_force = Register(0)
         self.forward_force = Register(0)
-        
-       
+
+    def distanceToWaypoint(self):
+        target_x = world.visualisation.wayPointMarker.center[0]
+        target_y = world.visualisation.wayPointMarker.center[1]
+
+        sailboat_x = self.position_x
+        sailboat_y = self.position_y
+
+        distance_x = target_x - sailboat_x
+        distance_y = target_y - sailboat_y
+
+        #print("Distance to waypoint: (", distance_x,  ",", distance_y, ")")
+
+        return distance_x, distance_y
+
+    def angleToWaypoint(self, distance_x, distance_y):
+        deltaX = distance_x
+        deltaY = distance_y
+        rad = math.atan2(deltaY, deltaX)
+        deg = rad * (180/ math.pi)
+ 
+        print("delta X: ", deltaX, "delta Y: ", deltaY)
+        print("angle waypoint: ", deg)
+
+        return deg
+
     def input(self):
         self.part('target sail angle')
         self.target_sail_angle.set(world.control.target_sail_angle)
@@ -61,14 +92,11 @@ class Sailboat (Module):
 
 
     def sweep(self):
-        #self.sailboat_rotation = 180
-        self.position_x.set(self.position_x + world.control.movement_speed)
 
-        if self.sail_angle > self.target_sail_angle:
-            self.sail_angle.set(self.sail_angle - 1)
+        
 
-        if self.sail_angle < self.target_sail_angle:
-            self.sail_angle.set(self.sail_angle + 1)
+        if self.local_sail_angle > self.target_sail_angle:
+            self.local_sail_angle.set(self.local_sail_angle - 1)
 
         self.sailboat_rotation.set(self.gimbal_rudder_angle + world.control.movement_speed)
 
@@ -79,9 +107,31 @@ class Sailboat (Module):
          
         if self.gimbal_rudder_angle < self.target_gimbal_rudder_angle:
             self.gimbal_rudder_angle.set(self.gimbal_rudder_angle + 1)
+
+        self.global_sail_angle.set((self.sailboat_rotation + self.local_sail_angle) % 360)
+        alpha = abs(self.global_sail_angle - world.wind.wind_direction)
+        perpendicular_thrust = math.cos(math.radians(alpha)) * world.wind.wind_scalar
+        forward_thrust = math.sin(math.radians(45)) * perpendicular_thrust
+        self.position_x.set(self.position_x + world.control.movement_speed_x)
+        self.position_y.set(self.position_y + world.control.movement_speed_y)
             
         if self.perpendicular_force.set(self.drag_force / cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
             self.perpendicular_force % 360
+
+        # TODO: Discuss
+        # if self.forward_force.set(forward_thrust * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
+        #     self.forward_force % 360
+
+        # TODO: Discuss
+        if self.gimbal_rudder_angle < 90:
+            self.sailboat_rotation += (0.01*forward_thrust)*self.gimbal_rudder_angle
+            
+
+        else:
+            self.gimbal_rudder_angle.set(90)
+        self.angleToWaypoint(self.distanceToWaypoint()[0], self.distanceToWaypoint()[1])
+        #print(forward_thrust)
+
             
         if self.forward_force.set(self.fake_speed * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
             self.forward_force % 360

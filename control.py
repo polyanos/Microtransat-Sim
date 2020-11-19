@@ -8,7 +8,8 @@ class Control(Module):
         self.page('sailboat movement control')
 
         self.group('control', True)
-        self.movement_speed = Register(0)
+        self.movement_speed_x = Register(0)
+        self.movement_speed_y = Register(0)
 
         self.group('sail')
         self.target_sail_angle = Register()
