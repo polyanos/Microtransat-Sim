@@ -61,7 +61,7 @@ class Sailboat (Module):
         deltaX = distance_x
         deltaY = distance_y
         rad = math.atan2(deltaY, deltaX)
-        deg = rad * (180/ math.pi)
+        deg = abs(rad * (180/ math.pi))
  
         print("delta X: ", deltaX, "delta Y: ", deltaY)
         print("angle waypoint: ", deg)
