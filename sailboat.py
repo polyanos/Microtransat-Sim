@@ -1,8 +1,8 @@
-from control import Control
-from visualisation import Visualisation
 from simpylc import *
 from enum import Enum
 from math import *
+from pid import *
+import time
 
 class CompassDirection(Enum):
     NORTH = 0
@@ -38,6 +38,10 @@ class Sailboat (Module):
         self.perpendicular_force = Register(0)
         self.forward_force = Register(0)
 
+        self.group("time")
+        self.last_time = Register(time.time())
+        
+
     def distanceToWaypoint(self):
         target_x = world.visualisation.wayPointMarker.center[0]
         target_y = world.visualisation.wayPointMarker.center[1]
@@ -58,8 +62,8 @@ class Sailboat (Module):
         rad = math.atan2(deltaY, deltaX)
         deg = abs(rad * (180/ math.pi))
  
-        print("delta X: ", deltaX, "delta Y: ", deltaY)
-        print("angle waypoint: ", deg)
+        # print("delta X: ", deltaX, "delta Y: ", deltaY)
+        # print("angle waypoint: ", deg)
 
         return deg
 
@@ -72,6 +76,16 @@ class Sailboat (Module):
 
     def sweep(self):
 
+
+        self.currentTime = time.time()
+        self.deltaTime = (self.currentTime - self.last_time)
+        self.last_time = time.time()
+        if self.deltaTime > 0:
+            self.deltaTime
+        else:
+            self.deltaTime = 1e-16
+        
+        print("ZZZ:   ", self.deltaTime)
         if self.local_sail_angle > self.target_sail_angle:
             self.local_sail_angle.set(self.local_sail_angle - 1)
         
@@ -92,8 +106,8 @@ class Sailboat (Module):
             self.perpendicular_force % 360
 
         # TODO: Discuss
-        # if self.forward_force.set(forward_thrust * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
-        #     self.forward_force % 360
+        if self.forward_force.set(forward_thrust * cos(self.target_gimbal_rudder_angle * (180/(22/7)))):
+            self.forward_force % 360
 
         # TODO: Discuss
         if self.gimbal_rudder_angle < 90:
@@ -107,21 +121,38 @@ class Sailboat (Module):
         #     world.control.movement_speed_x = 0.0
         #     world.control.movement_speed_y = 0.0
 
-        if self.distanceToWaypoint()[0] > 1:
-            if world.visualisation.wayPointMarker.center[0] >= self.position_x:
-                world.control.movement_speed_x = 0.05
-            else:
-                world.control.movement_speed_x = -0.05
-        else:
-            world.control.movement_speed_x = 0
 
-        if self.distanceToWaypoint()[1] > 1:
-            if world.visualisation.wayPointMarker.center[1]>= self.position_y:
-                world.control.movement_speed_y = 0.05
-            else:
-                world.control.movement_speed_y = -0.05
-        else:
-            world.control.movement_speed_y = 0
+
+
+        print("angle:  ", self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]))
+        if Pid().control(self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]), 1, 2) > 5:
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle + 1)
+            #self.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle + 1)
+            world.control.movement_speed_x = 0.1
+            world.control.movement_speed_y = 0.1
+            print("oi: ", self.target_gimbal_rudder_angle)
+
+        print("angle of boat: ", self.sailboat_rotation)
+
+
+
+
+
+        #     if world.visualisation.wayPointMarker.center[0] >= self.position_x:
+        #         world.control.movement_speed_x = 0.05
+        #     else:
+        #         world.control.movement_speed_x = -0.05
+        # else:
+        #     world.control.movement_speed_x = 0
+
+        # if self.distanceToWaypoint()[1] > 1:
+        #     if world.visualisation.wayPointMarker.center[1]>= self.position_y:
+        #         world.control.movement_speed_y = 0.05
+        #     else:
+        #         world.control.movement_speed_y = -0.05
+        # else:
+        #     world.control.movement_speed_y = 0
         
 
 
@@ -140,3 +171,4 @@ class Sailboat (Module):
         #     tempVane = self.wind_vane_angle
         #     # print("speed: ", world.control.movement_speed)
         #     # print("wind direction is ", tempVane+0)
+       
