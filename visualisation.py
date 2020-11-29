@@ -8,7 +8,7 @@ class Visualisation (Scene):
         self.camera = Camera()
         # Waypoint
         waypointColor = (1,0,0)
-        self.wayPointMarker = Beam(size=(1,1,1), center=(72,69,0), color=waypointColor)
+        self.wayPointMarker = Beam(size=(1,1,1), center=(25,25,0), color=waypointColor)
         # Hull
         hull_color = (1, 1, 1)
         self.hull = Beam(size=(1, 0.4, 0.15), center=(0, 0, 0), color=hull_color)
