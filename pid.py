@@ -39,9 +39,7 @@ class Pid (Module):
         elif desiredHeading > currentHeading:
             #turn rudder right currentheading--
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + output)
-            # if world.control.target_gimbal_rudder_angle > 35:
-            #     world.control.target_gimbal_rudder_angle.set(35)
-
+            
             print("ELIF BOOP")
         else:
             #straighten rudder

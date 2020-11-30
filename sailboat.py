@@ -89,9 +89,11 @@ class Sailboat (Module):
         else:
             self.deltaTime = 1e-16
         
-        print("ZZZ:   ", self.deltaTime)
         if self.local_sail_angle > self.target_sail_angle:
             self.local_sail_angle.set(self.local_sail_angle - 1)
+        
+        if self.local_sail_angle < self.target_sail_angle:
+            self.local_sail_angle.set(self.local_sail_angle + 1)
         
         if self.gimbal_rudder_angle > self.target_gimbal_rudder_angle:
             self.gimbal_rudder_angle.set(self.gimbal_rudder_angle - 1)
