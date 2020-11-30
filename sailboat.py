@@ -62,9 +62,6 @@ class Sailboat (Module):
         deltaY = distance_y
         rad = math.atan2(deltaY, deltaX)
         deg = rad * (180/ math.pi)
- 
-        # print("delta X: ", deltaX, "delta Y: ", deltaY)
-        # print("angle waypoint: ", deg)
 
         return deg
 
@@ -113,7 +110,6 @@ class Sailboat (Module):
 
         # TODO: Discuss
         if self.gimbal_rudder_angle < 90:
-            #self.sailboat_rotation += (0.01*forward_thrust)*self.gimbal_rudder_angle
             self.sailboat_rotation += (0.01)*self.gimbal_rudder_angle
             
             print("wtf am i doing?: ", self.sailboat_rotation)
@@ -124,86 +120,17 @@ class Sailboat (Module):
         pidMainOutput = Pid().control(self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]), 2)
         world.control.movement_speed_x = 0.02
         world.control.movement_speed_y = 0.02
-        # pidRudderOutput = Pid().control(1,1,1)
-        # pidSailOutput = Pid().control(1,1,1)
 
-        #missingAngle = self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1])
-        #print("pid output outside loop: ", pidMainOutput)
-        #print("missing angle: ", missingAngle)
-
-
-
-        # if  pidMainOutput > 5:
         print("pid output inside loop: ", pidMainOutput)
-        #angleToAdjust = ((self.sailboat_rotation + missingAngle))
-       # print("angleToAdjust: ", angleToAdjust)
-        # if (missingAngle >  self.sailboat_rotation)%360:
-        #     world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle + 1)
-        # elif(missingAngle < self.sailboat_rotation)%360:
-        #     world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle - 1)
-        # else:
-        #     world.control.target_gimbal_rudder_angle.set(0)
-
-
-
-        # if missingAngle > 0:
-        #     world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle + 1)
-        # else:
-        #     world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle - 1)
-
-        # elif pidMainOutput < 5:
-        #     world.control.gimbal_rudder_angle.set(0)
-            
-        
-            
-            #world.control.target_gimbal_rudder_angle.set(self.target_gimbal_rudder_angle + 1)
-            # world.control.movement_speed_x = 0.1
-            # world.control.movement_speed_y = 0.1
-            #print("oi: ", self.target_gimbal_rudder_angle)
-
-        # print("angle of boat: ", self.sailboat_rotation)
-
-
-
-        # if heading between north and west x+ y-
-        # if heading between north and east x+ y+
-        # if heading between south and west x- y-
-        #if heading between south and east x- y+
 
 
 
 
 
-        #     if world.visualisation.wayPointMarker.center[0] >= self.position_x:
-        #         world.control.movement_speed_x = 0.05
-        #     else:
-        #         world.control.movement_speed_x = -0.05
-        # else:
-        #     world.control.movement_speed_x = 0
-
-        # if self.distanceToWaypoint()[1] > 1:
-        #     if world.visualisation.wayPointMarker.center[1]>= self.position_y:
-        #         world.control.movement_speed_y = 0.05
-        #     else:
-        #         world.control.movement_speed_y = -0.05
-        # else:
-        #     world.control.movement_speed_y = 0
-        
-
-
-        #         target_x = world.visualisation.wayPointMarker.center[0]
-        # target_y = world.visualisation.wayPointMarker.center[1]
-
-        # sailboat_x = self.position_x
-        # sailboat_y = self.position_y
 
 
 
-        # if self.distanceToWaypoint()[0] < 5 and self.distanceToWaypoint()[1] < 5:
-        #     #world.control.movement_speed = 0.0
-        #     #print("reached waypoint radius")
-        # else: 
-        #     tempVane = self.wind_vane_angle
-        #     # print("speed: ", world.control.movement_speed)
-        #     # print("wind direction is ", tempVane+0)
+
+
+
        

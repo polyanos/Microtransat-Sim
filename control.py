@@ -25,8 +25,8 @@ class Control(Module):
         if self.target_sail_angle < -90:
             self.target_sail_angle.set(-90)
 
-        if self.target_gimbal_rudder_angle > 45:
-            self.target_gimbal_rudder_angle.set(45)
+        if self.target_gimbal_rudder_angle > 35:
+            self.target_gimbal_rudder_angle.set(35)
         
-        if self.target_gimbal_rudder_angle < -45:
-            self.target_gimbal_rudder_angle.set(-45)
+        if self.target_gimbal_rudder_angle < -35:
+            self.target_gimbal_rudder_angle.set(-35)

@@ -16,18 +16,8 @@ class Pid (Module):
         self.currentheading = Register()
         self.dt = Register()
 
-    # def sweep(self):
-    #     # self.currentInput = random.randint(1,50)
-    #     # self.dt = random.randint(1,10)
-    #     self.control(self.currentInput, self.expectedInput, self.dt)
 
     def control(self, desiredHeading, dt):
-        #fixing this function, it does it meet the requirements for what we need
-        #suppose to take in desired angle and current angle and return the error between those 2
-        #KI is checking if we are still turning the wrong way and ramps up as needed
-        #KD is checking if we are turning too fast and slows it down
-        #KP is a set value between negative and positive
-
         currentHeading = world.sailboat.globalBoatRotation
 
         if desiredHeading < 0:
@@ -44,34 +34,26 @@ class Pid (Module):
         if desiredHeading < currentHeading:
             #turn rudder left currentheading++
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + output)
-            print("boop")
+
+            print("IF BOOP")
         elif desiredHeading > currentHeading:
             #turn rudder right currentheading--
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + output)
+            # if world.control.target_gimbal_rudder_angle > 35:
+            #     world.control.target_gimbal_rudder_angle.set(35)
 
-            print("boop2")
+            print("ELIF BOOP")
         else:
             #straighten rudder
-            print("yo")
+            print("ELSE YO")
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + 0.0001)
-
-        print("BOOPDIBOOP", error)
+        if world.control.target_gimbal_rudder_angle > 35:
+            world.control.target_gimbal_rudder_angle.set(35)
+        if world.control.target_gimbal_rudder_angle < -35:
+            world.control.target_gimbal_rudder_angle.set(-35)
+        print("ERROR: ", error)
         print("OUTPUT: ", output)
 
-
-        #TODO
-        # OUTPUT USED TO CALCULATE HOW MUCH THE RUDDER MUST SPINNY SPIN
-        # error = abs(desiredHeading - currentHeading)
-        # outputP = self.calculateProportional(error)
-        # outputI = self.calculateIntergrational(dt, error)
-        # outputD = self.calculateDifferentional(currentHeading, dt, error)
-
-        # #figure out a proper output type for the whole function
-        # output = outputP + outputI + outputD
-        # self.latestInput = currentHeading
-        # print("kp value is: ", outputP, " | ki value is: ", outputI, " | kd value is: ", outputD, " | output: ", output)
-        # print(" ")
-        # return output
 
     def calculateProportional(self, error):
         return self.kp * error
