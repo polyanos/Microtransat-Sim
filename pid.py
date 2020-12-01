@@ -30,6 +30,13 @@ class Pid (Module):
         outputD = self.calculateDifferentional(currentHeading, dt, error)
         output = outputP + outputI + outputD
 
+        print("outputP: ", outputP)
+        print("outputI: ", outputI)
+        print("outputD: ", outputD)
+        print("outputMAIN: ", output)
+        print("CURRENTHEADING: ", currentHeading)
+        print("DESIREDHEADING: ", desiredHeading)
+
 
         if desiredHeading < currentHeading:
             #turn rudder left currentheading++
@@ -39,16 +46,23 @@ class Pid (Module):
         elif desiredHeading > currentHeading:
             #turn rudder right currentheading--
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + output)
-            
+
             print("ELIF BOOP")
         else:
             #straighten rudder
             print("ELSE YO")
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle + 0.0001)
+       
+        if world.control.target_gimbal_rudder_angle == 0:
+            world.control.target_gimbal_rudder_angle.set(0)
         if world.control.target_gimbal_rudder_angle > 35:
             world.control.target_gimbal_rudder_angle.set(35)
+
         if world.control.target_gimbal_rudder_angle < -35:
             world.control.target_gimbal_rudder_angle.set(-35)
+
+
+
         print("ERROR: ", error)
         print("OUTPUT: ", output)
 
@@ -57,13 +71,13 @@ class Pid (Module):
         return self.kp * error
 
     def calculateIntergrational(self, dt, error):
-        print("PID CLASS ENTER LOOP: ", self.errorIntegral)
+       # print("PID CLASS ENTER LOOP: ", self.errorIntegral)
         self.errorIntegral += self.ki * error * dt
-        print("PID CLASS EXIT LOOP: ", self.errorIntegral)
+       # print("PID CLASS EXIT LOOP: ", self.errorIntegral)
         return self.errorIntegral
 
     def calculateDifferentional(self, currentInput, dt, error):
-        return self.kd * ((currentInput - self.latestInput) / dt)
+        return self.kd * ((currentInput - error) / dt)
 
 
 

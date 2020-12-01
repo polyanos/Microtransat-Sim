@@ -59,7 +59,7 @@ class Sailboat (Module):
         distance_x = target_x - sailboat_x
         distance_y = target_y - sailboat_y
 
-        print("Distance to waypoint: (", distance_x,  ",", distance_y, ")")
+        #print("Distance to waypoint: (", distance_x,  ",", distance_y, ")")
 
         return distance_x, distance_y
 
@@ -84,6 +84,7 @@ class Sailboat (Module):
         self.currentTime = time.time()
         self.deltaTime = (self.currentTime - self.last_time)
         self.last_time = time.time()
+        self.globalBoatRotation.set(self.sailboat_rotation)
         if self.deltaTime > 0:
             self.deltaTime
         else:
@@ -142,8 +143,9 @@ class Sailboat (Module):
         horizontal_force = cos(global_sailboat_rotation) * forward_force
         vertical_force = sin(global_sailboat_rotation) * forward_force
 
-        self.position_x.set(self.position_x - vertical_force * 0.001)
-        self.position_y.set(self.position_y + horizontal_force * 0.001)
+        multiSpeed = 0.01
+        self.position_x.set(self.position_x - vertical_force * multiSpeed)
+        self.position_y.set(self.position_y + horizontal_force * multiSpeed)
 
         if self.perpendicular_force.set(self.drag_force / cos(self.target_gimbal_rudder_angle * (180 / (22 / 7)))):
             self.perpendicular_force % 360
