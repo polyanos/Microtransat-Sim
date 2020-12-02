@@ -36,22 +36,22 @@ class Visualisation (Scene):
 
         # Hull
         hull_color = (1, 1, 1)
-        self.hull = Beam(size=(1, 0.4, 0.15), center=(0, 0, 0), color=hull_color)
-        self.nose = Beam(size=(0.275, 0.275, 0.15), center=(-0.5, 0, 0), angle=45, color=hull_color)
-        self.rear = Cylinder(size=(0.4, 0.4, 0.15), center=(0.5, 0, 0), color=hull_color)
+        self.hull = Beam(size=(0.4, 1, 0.15), center=(0, 0, 0), color=hull_color)
+        self.nose = Beam(size=(0.275, 0.275, 0.15), center=(0, -0.5, 0), angle=45, color=hull_color)
+        self.rear = Cylinder(size=(0.4, 0.4, 0.15), center=(0, 0.5, 0), color=hull_color)
         
         # Rudder
         rudder_color = (1, 1, 1)
-        self.rudder = Beam(size=(0.4, 0.05, 1.5), center=(0.08, 0, -0.77), color=rudder_color)
-        self.gimbal_rudder = Ellipsoid(size=3 * (0.05,), center=(0.7, 0, -0.10), pivot=(0, 0, 1), color=rudder_color)
+        self.rudder = Beam(size=(0.05, 0.4, 1.5), center=(0, 0, -0.77), color=rudder_color)
+        self.gimbal_rudder = Ellipsoid(size=3 * (0.05,), center=(0, 0.7, -0.10), pivot=(0, 0, 1), color=rudder_color)
 
         # Sail
         mast_color = (1, 1, 1)
         sail_color = (1, 0, 0)
         self.mast = Cylinder(size=(0.05, 0.05, 1), center=(0, 0, 0.5), color=mast_color)
         self.gimbal = Ellipsoid(size=3 * (0.05,), center=(0, 0, -0.25), pivot=(0, 0, 1), color=mast_color)
-        self.boom = Cylinder(size=(0.05, 0.05, 0.45), center=(0.25, 0, 0), axis=(0, 1, 0), angle=90, color=mast_color)
-        self.sail = Beam(size=(0.4, 0.025, 0.7), center=(0, 0, 0.4), color=sail_color)
+        self.boom = Beam(size=(0.05, 0.5, 0.05), center=(0, 0.25, 0), color=mast_color)
+        self.sail = Beam(size=(0.025, 0.4, 0.7), center=(0, 0, 0.4), color=sail_color)
 
         # Wind vane
         wind_vane_color = (0, 1, 0)
@@ -72,11 +72,6 @@ class Visualisation (Scene):
             position=sailboat_position,
             rotation=world.sailboat.sailboat_rotation,
             parts=lambda:
-                self.gimbal_rudder(
-                    rotation=world.sailboat.gimbal_rudder_angle,
-                    parts=lambda:
-                        self.rudder()
-                    ) +
                 self.nose() +
                 self.rear() +
                 self.mast(
@@ -89,6 +84,11 @@ class Visualisation (Scene):
                                         self.sail()
                                 )
                         )
+                ) +
+                self.gimbal_rudder(
+                    rotation=world.sailboat.gimbal_rudder_angle,
+                    parts=lambda:
+                        self.rudder()
                 )
         )
 

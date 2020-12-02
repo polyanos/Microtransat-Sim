@@ -8,7 +8,7 @@ class Wind (Module):
         self.page('wind physics')
 
         self.group('wind direction', True)
-        self.wind_direction = Register(0)
+        self.wind_direction = Register(180)
         self.wind_scalar = Register(15)
 
     def sweep(self):
