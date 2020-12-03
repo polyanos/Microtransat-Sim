@@ -52,13 +52,21 @@ class Sailboat (sp.Module):
 
         self.page('sailboat')
 
-        self.group('position', True)
+        self.group('transform', True)
         self.position_x = sp.Register()
         self.position_y = sp.Register()
         self.position_z = sp.Register()
-        
-        self.group('rotation')
         self.sailboat_rotation = sp.Register()
+
+        self.group('body')
+        self.mass = sp.Register(20)
+
+        self.group('velocity')
+        self.drag = sp.Register()
+        self.acceleration = sp.Register()
+        self.forward_velocity = sp.Register()
+        self.horizontal_velocity = sp.Register()
+        self.vertical_velocity = sp.Register()
 
         self.group('sail')
         self.target_sail_angle = sp.Register()
@@ -67,12 +75,11 @@ class Sailboat (sp.Module):
         self.sail_alpha = sp.Register()
         self.perpendicular_sail_force = sp.Register()
         self.forward_sail_force = sp.Register()
-        self.horizontal_sail_force = sp.Register()
-        self.vertical_sail_force = sp.Register()
         
-        self.group('gimbal rudder')
+        self.group('rudder')
         self.target_gimbal_rudder_angle = sp.Register(0)
         self.gimbal_rudder_angle = sp.Register(0)
+        self.rotation_speed = sp.Register()
 
     def input(self):
         self.part('target sail angle')
@@ -91,7 +98,7 @@ class Sailboat (sp.Module):
         self.gimbal_rudder_angle.set(self.gimbal_rudder_angle + 1,
                                      self.gimbal_rudder_angle < self.target_gimbal_rudder_angle)
 
-        # Calculate forward force in N
+        # Calculate forward force in N based on the angle between the sail and the wind
         self.sail_alpha.set(sp.abs(self.global_sail_angle - sp.world.wind.wind_direction) % 360)
         self.sail_alpha.set(sp.abs(180 - self.sail_alpha) % 360, self.sail_alpha > 90)
         self.perpendicular_sail_force.set(sp.world.wind.wind_scalar * sp.sin(self.sail_alpha))
@@ -101,17 +108,23 @@ class Sailboat (sp.Module):
         # Sailing against wind
         min_threshold = (self.global_sail_angle - 180) % 360
         max_threshold = (self.global_sail_angle + 180) % 360
-        self.forward_sail_force.set(self.forward_sail_force * 0.01,
+        self.forward_sail_force.set(0,
                                     is_sailing_against_wind(min_threshold,
                                                             max_threshold,
                                                             self.local_sail_angle,
                                                             self.global_sail_angle,
                                                             sp.world.wind.wind_direction))
 
-        # Splitting forward thrust vector into vertical and horizontal components
-        self.vertical_sail_force.set(sp.cos(self.sailboat_rotation) * self.forward_sail_force)
-        self.horizontal_sail_force.set(sp.sin(self.sailboat_rotation) * self.forward_sail_force)
+        # Newton's second law
+        self.drag.set(self.forward_velocity * 0.05)
+        self.acceleration.set(self.forward_sail_force / self.mass - self.drag)
+        self.forward_velocity.set(sp.limit(self.forward_velocity + self.acceleration * sp.world.period, 8))
 
-        self.position_x.set(self.position_x + self.horizontal_sail_force * 0.001)
-        self.position_y.set(self.position_y - self.vertical_sail_force * 0.001)
-        self.sailboat_rotation.set((self.sailboat_rotation - 0.01 * self.gimbal_rudder_angle) % 360)
+        # Splitting forward velocity vector into vertical and horizontal components
+        self.vertical_velocity.set(sp.cos(self.sailboat_rotation) * self.forward_velocity)
+        self.horizontal_velocity.set(sp.sin(self.sailboat_rotation) * self.forward_velocity)
+
+        self.position_x.set(self.position_x + self.horizontal_velocity * 0.001)
+        self.position_y.set(self.position_y - self.vertical_velocity * 0.001)
+        self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
+        self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
