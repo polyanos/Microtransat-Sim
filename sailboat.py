@@ -3,6 +3,7 @@ from enum import Enum
 from math import *
 from pid import *
 import time
+import random
 
 class CompassDirection(Enum):
     NORTH = 0
@@ -28,7 +29,7 @@ class Sailboat (Module):
         self.position_z = Register()
         
         self.group('rotation', True)
-        self.sailboat_rotation = Register(0)  
+        self.sailboat_rotation = Register(90)  
         self.globalBoatRotation = Register(self.sailboat_rotation)
 
         self.group('sail')
@@ -47,7 +48,16 @@ class Sailboat (Module):
 
         self.group("time")
         self.last_time = Register(time.time())
-        
+
+        self.group("waypoint direction")
+        self.angleToSail = Register(90)
+        self.skp = Register(0)
+        self.ski = Register(0)
+        self.skd = Register(0)
+
+        #self.pidMainOutput = Pid().control(self.angleToSail, world.period)
+        self.pidMainOuput = Pid()
+
 
     def distanceToWaypoint(self):
         target_x = world.visualisation.wayPointMarker.center[0]
@@ -84,11 +94,9 @@ class Sailboat (Module):
         self.currentTime = time.time()
         self.deltaTime = (self.currentTime - self.last_time)
         self.last_time = time.time()
-        self.globalBoatRotation.set(self.sailboat_rotation)
-        if self.deltaTime > 0:
-            self.deltaTime
-        else:
-            self.deltaTime = 1e-16
+
+        self.globalBoatRotation.set((self.sailboat_rotation - 90) % 360)
+
         
         if self.local_sail_angle > self.target_sail_angle:
             self.local_sail_angle.set(self.local_sail_angle - 1)
@@ -158,11 +166,17 @@ class Sailboat (Module):
         else:
             self.gimbal_rudder_angle.set(90)
 
-        pidMainOutput = Pid().control(self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]), 2)
+        self.pidMainOuput.control(self.angleToSail, world.period)
+
+        self.pidMainOuput.setKp(self.skp)
+        self.pidMainOuput.setKi(self.ski)
+        self.pidMainOuput.setKd(self.skd)
+        print(world.period)
+        #random.randint(1,10)
+        # pidMainOutput = Pid().control(self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]), 2)
         # world.control.movement_speed_x = 0.02
         # world.control.movement_speed_y = 0.02
 
-        print("pid output inside loop: ", pidMainOutput)
 
             
 
