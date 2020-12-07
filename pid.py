@@ -84,7 +84,7 @@ class Pid (Module):
 
         outputP = self.calculateProportional(self.error)
         outputI = self.calculateIntergrational(dt, self.error)
-        outputD = self.calculateDifferentional(currentHeading, dt, self.error)
+        outputD = self.calculateDifferentional(currentHeading, dt, self.errorc)
         output = outputP + outputI +outputD
 
         if (self.error > 0 and output > 0) or (self.error < 0 and output < 0):
@@ -153,7 +153,7 @@ class Pid (Module):
 
     def calculateDifferentional(self, currentInput, dt, error):
         if error < 0:
-            return self.kd * ((currentInput + error) / dt)
+            return -self.kd * ((currentInput + error) / dt)
         else:
             return self.kd * ((currentInput - error) / dt)
 
