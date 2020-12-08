@@ -8,14 +8,8 @@
 # voorwaards = loodrecht * cos (beta)
 # beta = 90 - hoek van het zeil met de boot
 
+from pid import *
 import simpylc as sp
-
-
-# TODO: better naming
-def is_between_angles(n, a, b):
-    if a < b:
-        return a <= n <= b
-    return a <= n or n <= b
 
 
 def is_sailing_against_wind(min_threshold,
@@ -44,6 +38,42 @@ def is_sailing_against_wind(min_threshold,
         return True
 
     return False
+
+
+def is_between_angles(n, alpha, beta):
+    if alpha < beta:
+        return alpha <= n <= beta
+    return alpha <= n or n <= beta
+
+
+def distance_between_angles(alpha, beta):
+    phi = abs(beta - alpha) % 360
+    distance = (180 - phi) % 360 if phi > 90 else phi
+    return distance
+
+
+def optimal_sailing_angle(sailboat_rotation,
+                          wind_direction):
+    distance = distance_between_angles((sailboat_rotation + 180) % 360, wind_direction)
+
+    if distance > 180:
+        distance = (360 - distance) % 360
+
+    # If wind blows from starboard
+    if is_between_angles((sailboat_rotation - 180) % 360,
+                         sailboat_rotation,
+                         sp.world.wind.wind_direction):
+        distance = -distance
+
+    return distance / 2
+
+
+def angle_to_waypoint(delta_x, delta_y):
+    return sp.tan(delta_x / delta_y) * 1000
+
+
+def distance_between_waypoint(delta_x, delta_y):
+    return sp.sqrt(delta_x * delta_x + delta_y * delta_y)
 
 
 class Sailboat (sp.Module):
@@ -80,6 +110,8 @@ class Sailboat (sp.Module):
         self.target_gimbal_rudder_angle = sp.Register(0)
         self.gimbal_rudder_angle = sp.Register(0)
         self.rotation_speed = sp.Register()
+        self.rudder_pid = Pid()
+        self.passed_first_waypoint = sp.Register(False)
 
     def input(self):
         self.part('target sail angle')
@@ -89,6 +121,21 @@ class Sailboat (sp.Module):
         self.target_gimbal_rudder_angle.set(sp.world.control.target_gimbal_rudder_angle)
 
     def sweep(self):
+        if distance_between_waypoint(sp.abs(self.position_x - sp.world.waypoint.waypoint1_x),
+                                      sp.abs(self.position_y - sp.world.waypoint.waypoint1_y)) < 1:
+            self.passed_first_waypoint.set(True)
+
+        if not self.passed_first_waypoint:
+            alpha = angle_to_waypoint(sp.abs(self.position_x - sp.world.waypoint.waypoint1_x),
+                                      sp.abs(self.position_y - sp.world.waypoint.waypoint1_y))
+
+        else:
+            alpha = angle_to_waypoint(sp.abs(self.position_x - sp.world.waypoint.waypoint2_x),
+                                      sp.abs(self.position_y - sp.world.waypoint.waypoint2_y))
+
+        self.target_sail_angle.set(optimal_sailing_angle(self.sailboat_rotation,
+                                                         sp.world.wind.wind_direction), 90)
+
         self.local_sail_angle.set(self.local_sail_angle - 1, self.local_sail_angle > self.target_sail_angle)
         self.local_sail_angle.set(self.local_sail_angle + 1, self.local_sail_angle < self.target_sail_angle)
         self.global_sail_angle.set((self.sailboat_rotation + self.local_sail_angle + 180) % 360)
@@ -99,8 +146,7 @@ class Sailboat (sp.Module):
                                      self.gimbal_rudder_angle < self.target_gimbal_rudder_angle)
 
         # Calculate forward force in N based on the angle between the sail and the wind
-        self.sail_alpha.set(sp.abs(self.global_sail_angle - sp.world.wind.wind_direction) % 360)
-        self.sail_alpha.set(sp.abs(180 - self.sail_alpha) % 360, self.sail_alpha > 90)
+        self.sail_alpha.set(distance_between_angles(sp.world.wind.wind_direction, self.global_sail_angle))
         self.perpendicular_sail_force.set(sp.world.wind.wind_scalar * sp.sin(self.sail_alpha))
         self.forward_sail_force.set(self.perpendicular_sail_force * sp.sin(self.local_sail_angle))
         self.forward_sail_force.set(sp.abs(self.forward_sail_force))
@@ -128,3 +174,8 @@ class Sailboat (sp.Module):
         self.position_y.set(self.position_y - self.vertical_velocity * 0.001)
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
+
+        self.rudder_pid.control(alpha, sp.world.period)
+        self.rudder_pid.setKp(0.5)
+        self.rudder_pid.setKi(0.2)
+        self.rudder_pid.setKd(0.0005)

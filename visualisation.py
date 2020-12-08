@@ -6,8 +6,8 @@ nrOfObstacles = 64
 
 
 class Floor(Beam):
-    side = 32
-    spacing = 0.2
+    side = 64
+    spacing = 0.6
     halfSteps = round(0.5 * side / spacing)
 
     class Stripe(Beam):
@@ -33,6 +33,10 @@ class Visualisation (Scene):
 
         self.camera = Camera()
         self.floor = Floor(scene=self)
+
+        # Waypoint
+        waypoint_color = (1, 0, 0)
+        self.waypoint = Beam(size=(0.5, 0.5, 0.5), center=(0, 0, 0), color=waypoint_color)
 
         # Hull
         hull_color = (1, 1, 1)
@@ -62,11 +66,19 @@ class Visualisation (Scene):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 0.5))
 
         self.camera(
-            position=tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 3)),
+            position=tEva((world.sailboat.position_x, world.sailboat.position_y, world.sailboat.position_z + 10)),
             focus=tEva((world.sailboat.position_x + 0.00001,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.floor()
+
+        self.waypoint(
+            position=tEva((world.waypoint.waypoint1_x, world.waypoint.waypoint1_y, world.waypoint.waypoint1_z))
+        )
+
+        self.waypoint(
+            position=tEva((world.waypoint.waypoint2_x, world.waypoint.waypoint2_y, world.waypoint.waypoint2_z))
+        )
 
         self.hull(
             position=sailboat_position,
