@@ -12,5 +12,5 @@ class Wind (Module):
         self.wind_scalar = Register(15)
 
     def sweep(self):
-        self.wind_direction.set(self.wind_direction + random.uniform(-1, 1))
+        #self.wind_direction.set(self.wind_direction + random.uniform(-1, 1))
         self.wind_direction.set(self.wind_direction % 360)

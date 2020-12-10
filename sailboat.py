@@ -121,10 +121,10 @@ class Sailboat (sp.Module):
         self.forward_velocity.set(sp.limit(self.forward_velocity + self.acceleration * sp.world.period, 8))
 
         # Splitting forward velocity vector into vertical and horizontal components
-        self.vertical_velocity.set(sp.cos(self.sailboat_rotation) * self.forward_velocity)
-        self.horizontal_velocity.set(sp.sin(self.sailboat_rotation) * self.forward_velocity)
+        self.vertical_velocity.set(sp.sin(self.sailboat_rotation) * self.forward_velocity)
+        self.horizontal_velocity.set(sp.cos(self.sailboat_rotation) * self.forward_velocity)
 
         self.position_x.set(self.position_x + self.horizontal_velocity * 0.001)
-        self.position_y.set(self.position_y - self.vertical_velocity * 0.001)
+        self.position_y.set(self.position_y + self.vertical_velocity * 0.001)
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
