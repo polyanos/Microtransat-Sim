@@ -2,6 +2,7 @@ from simpylc import *
 
 
 def is_between_angles(n, a, b):
+  
     if a < b:
         return a <= n <= b
     return a <= n or n <= b
@@ -36,14 +37,14 @@ class Pid (Module):
         
 
     def clamp(self, error, clampOn):
-        print("IN CLAMP FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        #print("IN CLAMP FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         if self.error < -clampOn:
-            print("inside if -")
+            #print("inside if -")
             self.error = -clampOn
-            print("error inside clamp", error)
+            #print("error inside clamp", error)
             return self.error
         if self.error > clampOn:
-            print("inside if")
+            #print("inside if")
             self.error = clampOn
             return self.error
 
@@ -75,9 +76,9 @@ class Pid (Module):
         self.error = calculate_error(currentHeading, desiredHeading)
         self.errorc = calculate_error(currentHeading, desiredHeading)
         self.clamp(self.error, 5)
-        print("error after clamping: ", self.error,"  ", self.errorc)
+        #print("error after clamping: ", self.error,"  ", self.errorc)
         if self.error != self.errorc:
-            print("clamped@@@@@@")
+            #print("clamped@@@@@@")
             clampStatus = True
         else:
             clampStatus = False
@@ -88,27 +89,27 @@ class Pid (Module):
         output = outputP + outputI +outputD
 
         if (self.error > 0 and output > 0) or (self.error < 0 and output < 0):
-            print("S")
+            #print("S")
             integraterStatus = True
             #integrated still adding
         else:
             integraterStatus = False
         
-        print("clamp status: ", clampStatus, " intstatus: ", integraterStatus)
+        #print("clamp status: ", clampStatus, " intstatus: ", integraterStatus)
         if clampStatus == True and integraterStatus == True:
-            print("AM I SET TO 0?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            #print("AM I SET TO 0?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             self.errorIntegral = 0
 
-        print("KP: ", self.kp)
-        print("KI: ", self.ki)
-        print("KD: ", self.kd)
-        print("outputP: ", outputP)
-        print("outputI: ", outputI)
-        print("outputD: ", outputD)
-        print("outputMAIN: ", output)
-        print("ERROR: ", self.error)
-        print("CURRENTHEADING: ", currentHeading)
-        print("DESIREDHEADING: ", desiredHeading)
+        # print("KP: ", self.kp)
+        # print("KI: ", self.ki)
+        # print("KD: ", self.kd)
+        # print("outputP: ", outputP)
+        # print("outputI: ", outputI)
+        # print("outputD: ", outputD)
+        # print("outputMAIN: ", output)
+        # print("ERROR: ", self.error)
+        # print("CURRENTHEADING: ", currentHeading)
+        # print("DESIREDHEADING: ", desiredHeading)
 
 
 
@@ -118,12 +119,12 @@ class Pid (Module):
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle - (0.5 *output))
             if self.error < self.error - self.test:
                 world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle)      
-                print("IF INSIDE IF")
+                #print("IF INSIDE IF")
         else:
             #turn right
             world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle - (0.5 *output))
             if self.error > self.error + self.test:
-                print("IF INSIDE ELSE: ")
+                #print("IF INSIDE ELSE: ")
                 world.control.target_gimbal_rudder_angle.set(world.sailboat.target_gimbal_rudder_angle)
         
         if world.control.target_gimbal_rudder_angle > 35:
@@ -144,9 +145,9 @@ class Pid (Module):
         return self.kp * error
 
     def calculateIntergrational(self, dt, error):
-        print("in calc errorint: ", self.errorIntegral)
+        #print("in calc errorint: ", self.errorIntegral)
         self.errorIntegral += self.ki * error * dt
-        print("after in calc errorint: ", self.errorIntegral)
+        #print("after in calc errorint: ", self.errorIntegral)
 
 
         return self.errorIntegral

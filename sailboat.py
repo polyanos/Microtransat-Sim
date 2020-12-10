@@ -16,6 +16,16 @@ def is_between_angles(n, a, b):
         return a <= n <= b
     return a <= n or n <= b
 
+def is_between_deadwind(n, a, b):
+    #n = desired heading
+    #k = current heading
+    #a = deadzone 1
+    #b = deadzone 2
+
+    if a > n or b < n:
+        print("big deadzone")
+
+
 
 class Sailboat (Module):
     def __init__(self ):
@@ -51,9 +61,10 @@ class Sailboat (Module):
 
         self.group("waypoint direction")
         self.angleToSail = Register(90)
-        self.skp = Register(0)
-        self.ski = Register(0)
-        self.skd = Register(0)
+        self.correctedAngle = Register()
+        self.skp = Register(0.5)
+        self.ski = Register(0.2)
+        self.skd = Register(0.0005)
 
         #self.pidMainOutput = Pid().control(self.angleToSail, world.period)
         self.pidMainOuput = Pid()
@@ -88,7 +99,35 @@ class Sailboat (Module):
         self.part('gimbal rudder angle')
         self.target_gimbal_rudder_angle.set(world.control.target_gimbal_rudder_angle)
 
+    def test(self, ats):
+        test3 = ats +45
+        test4 = ats -45
+
+        if world.wind.wind_direction < test3 and world.wind.wind_direction > test4:
+            print("wind: ", world.wind.wind_direction)
+            return True
+        else:
+            return False
+
+            
+
+
+
     def sweep(self):
+
+        self.currentHeading = self.globalBoatRotation % 360
+        
+        if self.test(self.angleToSail):
+            if self.currentHeading < self.angleToSail:
+                self.correctedAngle = self.angleToSail - 45
+                #print(self.correctedAngle)
+            else:
+                self.correctedAngle = self.angleToSail + 45
+        else:
+            self.correctedAngle = self.angleToSail
+
+
+
 
 
         self.currentTime = time.time()
@@ -151,7 +190,7 @@ class Sailboat (Module):
         horizontal_force = cos(global_sailboat_rotation) * forward_force
         vertical_force = sin(global_sailboat_rotation) * forward_force
 
-        multiSpeed = 0.01
+        multiSpeed = 0.001
         self.position_x.set(self.position_x - vertical_force * multiSpeed)
         self.position_y.set(self.position_y + horizontal_force * multiSpeed)
 
@@ -166,16 +205,13 @@ class Sailboat (Module):
         else:
             self.gimbal_rudder_angle.set(90)
 
-        self.pidMainOuput.control(self.angleToSail, world.period)
+        self.pidMainOuput.control(self.correctedAngle, world.period)
+        #need to check if time function
 
         self.pidMainOuput.setKp(self.skp)
         self.pidMainOuput.setKi(self.ski)
         self.pidMainOuput.setKd(self.skd)
-        print(world.period)
-        #random.randint(1,10)
-        # pidMainOutput = Pid().control(self.angleToWaypoint(self.distanceToWaypoint()[0],self.distanceToWaypoint()[1]), 2)
-        # world.control.movement_speed_x = 0.02
-        # world.control.movement_speed_y = 0.02
+
 
 
             
