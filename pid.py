@@ -13,9 +13,9 @@ def calculate_error(current_heading, desired_heading):
     distance = 360 - phi if phi > 180 else phi
 
     if is_between_angles(current_heading, (current_heading - 180) % 360, desired_heading):
-        return -distance
-    else:
         return distance
+    else:
+        return -distance
 
 
 class Pid (Module):
@@ -64,7 +64,7 @@ class Pid (Module):
         self.kd = kd
 
     def control(self, desiredHeading, dt):
-        currentHeading = world.sailboat.globalBoatRotation
+        currentHeading = world.sailboat.sailboat_rotation
         clampStatus = None
         integraterStatus = None
 

@@ -10,9 +10,9 @@ class Wind (Module):
         self.page('wind physics')
 
         self.group('wind direction', True)
-        self.wind_direction = Register(0)
+        self.wind_direction = Register(180)
         self.wind_scalar = Register(15)
 
     def sweep(self):
-        self.wind_direction.set(self.wind_direction + random.uniform(-1, 1))
+        #self.wind_direction.set(self.wind_direction + random.uniform(-1, 1))
         self.wind_direction.set(self.wind_direction % 360)
