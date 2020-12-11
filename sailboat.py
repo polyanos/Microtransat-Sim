@@ -102,14 +102,18 @@ class Sailboat (sp.Module):
         self.skp = Register(0.5)
         self.ski = Register(0.2)
         self.skd = Register(0.0005)
+        self.targetx = Register(25)
+        self.targety = Register(25)
 
         #self.pidMainOutput = Pid().control(self.angleToSail, world.period)
         self.pidMainOuput = Pid()
 
 
     def distanceToWaypoint(self):
-        target_x = world.visualisation.wayPointMarker.center[0]
-        target_y = world.visualisation.wayPointMarker.center[1]
+        # target_x = sp.world.visualisation.wayPointMarker.center[0]
+        # target_y = sp.world.visualisation.wayPointMarker.center[1]
+        target_x = self.targetx
+        target_y = self.targety
 
         sailboat_x = self.position_x
         sailboat_y = self.position_y
@@ -127,7 +131,8 @@ class Sailboat (sp.Module):
         rad = math.atan2(deltaY, deltaX)
         deg = rad * (180/ math.pi)
 
-        return deg
+        #print("degrees to waypoint: ", deg)
+        return deg % 360
 
     def input(self):
         self.part('target sail angle')
@@ -151,6 +156,12 @@ class Sailboat (sp.Module):
 
 
     def sweep(self):
+
+        self.testval = self.angleToWaypoint(self.distanceToWaypoint()[0], self.distanceToWaypoint()[1])
+        print("test angle: ", self.testval)
+
+
+
         
         if self.test(self.angleToSail):
             if self.sailboat_rotation < self.angleToSail:
@@ -195,6 +206,8 @@ class Sailboat (sp.Module):
         # Splitting forward velocity vector into vertical and horizontal components
         self.vertical_velocity.set(sp.cos(self.sailboat_rotation) * self.forward_velocity)
         self.horizontal_velocity.set(sp.sin(self.sailboat_rotation) * self.forward_velocity)
+
+        
 
         self.position_x.set(self.position_x + self.horizontal_velocity * 0.001)
         self.position_y.set(self.position_y - self.vertical_velocity * 0.001)
