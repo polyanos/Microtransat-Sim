@@ -1,6 +1,7 @@
 # from simpylc import *
 from enum import Enum
 from math import *
+from pid_sail import Pid_sail
 from pid import *
 import simpylc as sp
 import time
@@ -107,6 +108,7 @@ class Sailboat (sp.Module):
 
         #self.pidMainOutput = Pid().control(self.angleToSail, world.period)
         self.pidMainOuput = Pid()
+        self.pid_sail_output = Pid_sail()
 
 
     def distanceToWaypoint(self):
@@ -157,20 +159,32 @@ class Sailboat (sp.Module):
 
     def sweep(self):
 
+        # print(self.last_time," TIME AT START OF PROGRAM")
+        # print(time.time())
         self.testval = self.angleToWaypoint(self.distanceToWaypoint()[0], self.distanceToWaypoint()[1])
-        print("test angle: ", self.testval)
+        #print("test angle: ", self.testval)
+
+
+        if self.test(self.testval):
+            if self.sailboat_rotation < self.testval:
+                self.correctedAngle = self.testval - 45
+                #print(self.correctedAngle)
+            else:
+                self.correctedAngle = self.testval + 45
+        else:
+            self.correctedAngle = self.testval
 
 
 
         
-        if self.test(self.angleToSail):
-            if self.sailboat_rotation < self.angleToSail:
-                self.correctedAngle = self.angleToSail - 45
-                #print(self.correctedAngle)
-            else:
-                self.correctedAngle = self.angleToSail + 45
-        else:
-            self.correctedAngle = self.angleToSail
+        # if self.test(self.angleToSail):
+        #     if self.sailboat_rotation < self.angleToSail:
+        #         self.correctedAngle = self.angleToSail - 45
+        #         #print(self.correctedAngle)
+        #     else:
+        #         self.correctedAngle = self.angleToSail + 45
+        # else:
+        #     self.correctedAngle = self.angleToSail
 
         self.local_sail_angle.set(self.local_sail_angle - 1, self.local_sail_angle > self.target_sail_angle)
         self.local_sail_angle.set(self.local_sail_angle + 1, self.local_sail_angle < self.target_sail_angle)
@@ -214,9 +228,16 @@ class Sailboat (sp.Module):
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
 
-
-        self.pidMainOuput.control(self.correctedAngle, world.period)
-        #need to check if time function
+        self.delta_time = 0.05
+        self.current_time = time.time()
+        self.elapsed_time = self.current_time - self.last_time
+        if self.elapsed_time > self.delta_time:
+            self.pidMainOuput.control(self.correctedAngle, sp.world.period)
+            sp.world.control.target_sail_angle.set( self.pid_sail_output.sail_control(self.sailboat_rotation, sp.world.wind.wind_direction))
+            print("sail angle?> ", self.target_sail_angle)
+            print("updating rudder info...", self.delta_time)
+            self.last_time = self.current_time
+            #need to check if time function
 
         self.pidMainOuput.setKp(self.skp)
         self.pidMainOuput.setKi(self.ski)

@@ -98,5 +98,3 @@ class Visualisation (Scene):
             parts=lambda:
                 self.wind_vane_pointer()
         )
-
-        self.wayPointMarker()
