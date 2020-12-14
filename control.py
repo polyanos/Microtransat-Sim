@@ -1,32 +1,25 @@
-from simpylc import *
+import simpylc as sp
 
 
-class Control(Module):
+class Control(sp.Module):
     def __init__(self):
-        Module.__init__(self)
+        sp.Module.__init__(self)
 
         self.page('sailboat movement control')
 
         self.group('control', True)
-        self.movement_speed_x = Register(0)
-        self.movement_speed_y = Register(0)
+        self.movement_speed_x = sp.Register(0)
+        self.movement_speed_y = sp.Register(0)
 
         self.group('sail')
-        self.target_sail_angle = Register()
-        
+        self.target_sail_angle = sp.Register()
+
         self.group('rudder')
-        self.target_gimbal_rudder_angle = Register()
+        self.target_gimbal_rudder_angle = sp.Register()
 
     def sweep(self):
-        #self.movement_speed = 0.1
         if self.target_sail_angle > 90:
             self.target_sail_angle.set(90)
 
         if self.target_sail_angle < -90:
             self.target_sail_angle.set(-90)
-
-        # if self.target_gimbal_rudder_angle > 35:
-        #     self.target_gimbal_rudder_angle.set(35)
-        
-        # if self.target_gimbal_rudder_angle < -35:
-        #     self.target_gimbal_rudder_angle.set(-35)

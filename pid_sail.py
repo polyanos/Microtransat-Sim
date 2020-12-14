@@ -1,5 +1,6 @@
 import simpylc as sp
-from pid import *
+import pid as pid
+
 
 def distance_between_angles(alpha, beta):
     phi = abs(beta - alpha) % 360
@@ -7,20 +8,16 @@ def distance_between_angles(alpha, beta):
     return distance
 
 
-
-class Pid_sail (Module):
+class Pid_sail (sp.Module):
     def __init__(self):
-        Module.__init__(self)
+        sp.Module.__init__(self)
 
         self.page("sailPID")
         self.group("PID", True)
-        self.kp = Register()
-        self.ki = Register()
-        self.kd = Register()
-        self.dt = Register()
-
-
-
+        self.kp = sp.Register()
+        self.ki = sp.Register()
+        self.kd = sp.Register()
+        self.dt = sp.Register()
 
     def sail_control(self, sailboat_rotation, wind_direction):
 
@@ -30,7 +27,7 @@ class Pid_sail (Module):
             distance = (360 - distance) % 360
 
         # If wind blows from starboard
-        if is_between_angles((sailboat_rotation - 180) % 360, sailboat_rotation, sp.world.wind.wind_direction):
+        if pid.is_between_angles((sailboat_rotation - 180) % 360, sailboat_rotation, sp.world.wind.wind_direction):
             distance = -distance
 
         # angle that the sail needs to turn to
@@ -39,7 +36,6 @@ class Pid_sail (Module):
         else:
             return distance / 2
 
-
     def calculate_proportional(self, error):
         return self.kp * error
 
@@ -47,6 +43,6 @@ class Pid_sail (Module):
         self.error_integral += self.ki * error * dt
 
         return self.error_integral
-    
+
     def calculate_differentional(self, dt, error):
         return 0

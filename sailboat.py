@@ -1,13 +1,14 @@
 # from simpylc import *
 from enum import Enum
-from math import *
-from pid_sail import Pid_sail
-from pid import *
+import math
 import simpylc as sp
+import pid as pid
+import pid_sail as pids
 import time
-import random
 
-class CompassDirection(Enum):
+
+class Compass_direction(Enum):
+
     NORTH = 0
     EAST = 90
     SOUTH = 180
@@ -19,16 +20,6 @@ def is_between_angles(n, a, b):
     if a < b:
         return a <= n <= b
     return a <= n or n <= b
-
-def is_between_deadwind(n, a, b):
-    #n = desired heading
-    #k = current heading
-    #a = deadzone 1
-    #b = deadzone 2
-
-    if a > n or b < n:
-        print("big deadzone")
-
 
 
 def is_sailing_against_wind(min_threshold,
@@ -88,32 +79,29 @@ class Sailboat (sp.Module):
         self.sail_alpha = sp.Register()
         self.perpendicular_sail_force = sp.Register()
         self.forward_sail_force = sp.Register()
-        
+
         self.group('rudder')
         self.target_gimbal_rudder_angle = sp.Register(0)
         self.gimbal_rudder_angle = sp.Register(0)
         self.rotation_speed = sp.Register()
 
         self.group("time")
-        self.last_time = Register(time.time())
+        self.last_time = sp.Register(time.time())
 
         self.group("waypoint direction")
-        self.angleToSail = Register(90)
-        self.correctedAngle = Register()
-        self.skp = Register(0.5)
-        self.ski = Register(0.2)
-        self.skd = Register(0.0005)
-        self.targetx = Register(25)
-        self.targety = Register(25)
+        self.angle_to_sail = sp.Register(90)
+        self.corrected_angle = sp.Register()
+        self.skp = sp.Register(0.5)
+        self.ski = sp.Register(0.2)
+        self.skd = sp.Register(0.0005)
+        self.targetx = sp.Register(25)
+        self.targety = sp.Register(25)
 
-        #self.pidMainOutput = Pid().control(self.angleToSail, world.period)
-        self.pidMainOuput = Pid()
-        self.pid_sail_output = Pid_sail()
+        # object declarations
+        self.pid_main_output = pid.Pid()
+        self.pid_sail_output = pids.Pid_sail()
 
-
-    def distanceToWaypoint(self):
-        # target_x = sp.world.visualisation.wayPointMarker.center[0]
-        # target_y = sp.world.visualisation.wayPointMarker.center[1]
+    def distance_to_waypoint(self):
         target_x = self.targetx
         target_y = self.targety
 
@@ -123,68 +111,55 @@ class Sailboat (sp.Module):
         distance_x = target_x - sailboat_x
         distance_y = target_y - sailboat_y
 
-        #print("Distance to waypoint: (", distance_x,  ",", distance_y, ")")
-
         return distance_x, distance_y
 
-    def angleToWaypoint(self, distance_x, distance_y):
+    def angle_to_waypoint(self, distance_x, distance_y):
         deltaX = distance_x
         deltaY = distance_y
         rad = math.atan2(deltaY, deltaX)
-        deg = rad * (180/ math.pi)
+        deg = rad * (180 / math.pi)
 
-        #print("degrees to waypoint: ", deg)
         return deg % 360
 
     def input(self):
+
         self.part('target sail angle')
         self.target_sail_angle.set(sp.world.control.target_sail_angle)
-        
         self.part('gimbal rudder angle')
         self.target_gimbal_rudder_angle.set(sp.world.control.target_gimbal_rudder_angle)
 
-    def test(self, ats):
-        test3 = ats +45
-        test4 = ats -45
+    def check_for_deadwind(self, ats):
+        deadwind_right = ats + 45
+        deadwind_left = ats - 45
 
-        if sp.world.wind.wind_direction < test3 and sp.world.wind.wind_direction > test4:
+        if sp.world.wind.wind_direction < deadwind_right and sp.world.wind.wind_direction > deadwind_left:
             print("wind: ", sp.world.wind.wind_direction)
             return True
         else:
             return False
 
-            
+    def tacking(self):
 
+        #check if we need to tack left or right
+        #depending on direction +- 90 so we turn 45 degree
+        #tacking will be called if the sum of n of accelaration is higher than current value
+        #need to figure out how to control rudder and sail angles to reach correct position
+        #might need to only change corrected angle to sail to ?
+        #big bug bomb potential
 
+        print("placeholder")
 
     def sweep(self):
 
-        # print(self.last_time," TIME AT START OF PROGRAM")
-        # print(time.time())
-        self.testval = self.angleToWaypoint(self.distanceToWaypoint()[0], self.distanceToWaypoint()[1])
-        #print("test angle: ", self.testval)
+        self.calculated_angle = self.angle_to_waypoint(self.distance_to_waypoint()[0], self.distance_to_waypoint()[1])
 
-
-        if self.test(self.testval):
-            if self.sailboat_rotation < self.testval:
-                self.correctedAngle = self.testval - 45
-                #print(self.correctedAngle)
+        if self.check_for_deadwind(self.calculated_angle):
+            if self.sailboat_rotation < self.calculated_angle:
+                self.corrected_angle = self.calculated_angle - 45
             else:
-                self.correctedAngle = self.testval + 45
+                self.corrected_angle = self.calculated_angle + 45
         else:
-            self.correctedAngle = self.testval
-
-
-
-        
-        # if self.test(self.angleToSail):
-        #     if self.sailboat_rotation < self.angleToSail:
-        #         self.correctedAngle = self.angleToSail - 45
-        #         #print(self.correctedAngle)
-        #     else:
-        #         self.correctedAngle = self.angleToSail + 45
-        # else:
-        #     self.correctedAngle = self.angleToSail
+            self.corrected_angle = self.calculated_angle
 
         self.local_sail_angle.set(self.local_sail_angle - 1, self.local_sail_angle > self.target_sail_angle)
         self.local_sail_angle.set(self.local_sail_angle + 1, self.local_sail_angle < self.target_sail_angle)
@@ -221,8 +196,6 @@ class Sailboat (sp.Module):
         self.vertical_velocity.set(sp.sin(self.sailboat_rotation) * self.forward_velocity)
         self.horizontal_velocity.set(sp.cos(self.sailboat_rotation) * self.forward_velocity)
 
-        
-
         self.position_x.set(self.position_x + self.horizontal_velocity * 0.001)
         self.position_y.set(self.position_y + self.vertical_velocity * 0.001)
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
@@ -231,14 +204,16 @@ class Sailboat (sp.Module):
         self.delta_time = 0.05
         self.current_time = time.time()
         self.elapsed_time = self.current_time - self.last_time
+
         if self.elapsed_time > self.delta_time:
-            self.pidMainOuput.control(self.correctedAngle, sp.world.period)
-            sp.world.control.target_sail_angle.set( self.pid_sail_output.sail_control(self.sailboat_rotation, sp.world.wind.wind_direction))
+            self.pid_main_output.control(self.corrected_angle, sp.world.period)
+            sp.world.control.target_sail_angle.set(
+                                                    self.pid_sail_output.sail_control(
+                                                        self.sailboat_rotation, sp.world.wind.wind_direction))
             print("sail angle?> ", self.target_sail_angle)
             print("updating rudder info...", self.delta_time)
             self.last_time = self.current_time
-            #need to check if time function
 
-        self.pidMainOuput.setKp(self.skp)
-        self.pidMainOuput.setKi(self.ski)
-        self.pidMainOuput.setKd(self.skd)
+        self.pid_main_output.setKp(self.skp)
+        self.pid_main_output.setKi(self.ski)
+        self.pid_main_output.setKd(self.skd)
