@@ -6,7 +6,14 @@ import pid as pid
 import pid_sail as pids
 import time
 
+# to run python world.py
+# need to manually change wind direction currently
 
+# pid_sail is WIP so it is not being used
+# some functions will be made into their own files
+# some functions need changing/missing
+
+#WIP
 class Compass_direction(Enum):
 
     NORTH = 0
@@ -20,6 +27,7 @@ def is_between_angles(n, a, b):
     if a < b:
         return a <= n <= b
     return a <= n or n <= b
+
 
 
 def is_sailing_against_wind(min_threshold,
@@ -91,9 +99,13 @@ class Sailboat (sp.Module):
         self.group("waypoint direction")
         self.angle_to_sail = sp.Register(90)
         self.corrected_angle = sp.Register()
+
+        # standard values kp 0.5, ki 0.2, kd 0.0005
         self.skp = sp.Register(0.5)
         self.ski = sp.Register(0.2)
         self.skd = sp.Register(0.0005)
+
+        # USE THIS TO SET WAYPOINT DESTINATION
         self.targetx = sp.Register(25)
         self.targety = sp.Register(25)
 
@@ -113,6 +125,9 @@ class Sailboat (sp.Module):
 
         return distance_x, distance_y
 
+    # WIP
+    # has bug where it does not work in all situations
+    # needs changing
     def angle_to_waypoint(self, distance_x, distance_y):
         deltaX = distance_x
         deltaY = distance_y
@@ -133,7 +148,6 @@ class Sailboat (sp.Module):
         deadwind_left = ats - 45
 
         if sp.world.wind.wind_direction < deadwind_right and sp.world.wind.wind_direction > deadwind_left:
-            print("wind: ", sp.world.wind.wind_direction)
             return True
         else:
             return False
@@ -151,8 +165,11 @@ class Sailboat (sp.Module):
 
     def sweep(self):
 
+        # calculates the angle to waypoint
+        # need better naming
         self.calculated_angle = self.angle_to_waypoint(self.distance_to_waypoint()[0], self.distance_to_waypoint()[1])
 
+        # This makes it turn 45 deg to the left or right if sailing into deadwind
         if self.check_for_deadwind(self.calculated_angle):
             if self.sailboat_rotation < self.calculated_angle:
                 self.corrected_angle = self.calculated_angle - 45
@@ -201,19 +218,25 @@ class Sailboat (sp.Module):
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
 
+
         self.delta_time = 0.05
         self.current_time = time.time()
         self.elapsed_time = self.current_time - self.last_time
 
+        #WIP
+        # updates PID every delta_time
+        # needs checking since it needs to happen without if statement
+        # problem probably lies in finetuning/adjusting PID
         if self.elapsed_time > self.delta_time:
             self.pid_main_output.control(self.corrected_angle, sp.world.period)
             sp.world.control.target_sail_angle.set(
                                                     self.pid_sail_output.sail_control(
                                                         self.sailboat_rotation, sp.world.wind.wind_direction))
-            print("sail angle?> ", self.target_sail_angle)
-            print("updating rudder info...", self.delta_time)
+            #print("sail angle?> ", self.target_sail_angle)
+            #print("updating rudder info...", self.delta_time)
             self.last_time = self.current_time
 
+        # temporary to be able to adjust KP/KI/KD values while sim is running
         self.pid_main_output.setKp(self.skp)
         self.pid_main_output.setKi(self.ski)
         self.pid_main_output.setKd(self.skd)
