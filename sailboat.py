@@ -83,12 +83,15 @@ class Sailboat (sp.Module):
 
     def input(self):
         self.part('target sail angle')
-        self.target_sail_angle.set(sp.world.control.target_sail_angle)
-        
+        self.target_sail_angle.set(sp.world.softwareFramework.optimal_sailing_angle)
+
         self.part('gimbal rudder angle')
         self.target_gimbal_rudder_angle.set(sp.world.control.target_gimbal_rudder_angle)
 
     def sweep(self):
+        # Software Framework
+        self.target_sail_angle.set(sp.world.softwareFramework.optimal_sailing_angle)
+
         self.local_sail_angle.set(self.local_sail_angle - 1, self.local_sail_angle > self.target_sail_angle)
         self.local_sail_angle.set(self.local_sail_angle + 1, self.local_sail_angle < self.target_sail_angle)
         self.global_sail_angle.set((self.sailboat_rotation + self.local_sail_angle + 180) % 360)
