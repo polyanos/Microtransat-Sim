@@ -1,4 +1,3 @@
-
 def is_between_angles(n, a, b):
     if a < b:
         return a <= n <= b
@@ -22,8 +21,6 @@ class Pid:
         self.error_integral = 0
         self.output_limits = 0
         self.latest_input = 0
-        self.desired_heading = 0
-        self.current_heading = 0
         self.error = 0
         self.error_check = 0
         self.clamp_status = None
@@ -64,13 +61,18 @@ class Pid:
         self.kd = kd
 
     # the main bulk of the program which calculates the error and adjusts the PID for the rudder
-    def control(self, desired_heading, dt):
-        current_heading = 0  # this needs to come from sensor/ simplyc.world
+    def control(self, desired_heading, current_heading, dt):
+        # current_heading = 0  # this needs to come from sensor/ simplyc.world
         desired_heading = desired_heading % 360
         current_heading = current_heading % 360
+        print("desired heading: ", desired_heading)
+        print("current heading: ", current_heading)
         self.error = calculate_error(current_heading, desired_heading)
         self.error_check = calculate_error(current_heading, desired_heading)
+        print("error: ", self.error, " errorc: ", self.error_check)
         self.clamp(5)
+        print("error2: ", self.error, " errorc2: ", self.error_check)
+
 
         # checks if the error and compare error are equal
         # most of the time it will be true
@@ -97,31 +99,10 @@ class Pid:
         if self.clamp_status is True and self.integrater_status is True:
             self.error_integral = 0
 
-        # WIP
-        # this function inner if doesn't work i think, bug test needed, if doesn't work remove
-        # this function needs fine tuning / redesigning so the it doesn't zig zag as often
-        # multiplier needs tweaking, think it is too big right now
-        # based on the error output it gets decided if the rudder needs to go left or right
-        # how much the rudder needs to adjust is based on the output of the PID
         if self.error < 0:
-            print("placeholder if")
-            # multiply the output by 0.5 this factor needs to be finetuned but 0.5 is ok for now
-            # sp.world.control.target_gimbal_rudder_angle.set(
-            #     sp.world.sailboat.target_gimbal_rudder_angle - (0.5 * output))
+            return 0.5 * output
         else:
-            print("placeholder else")
-            # sp.world.control.target_gimbal_rudder_angle.set(
-            #     sp.world.sailboat.target_gimbal_rudder_angle - (0.5 * output))
-
-        # clamps the -max/max rudder angle to the most optimal angle
-        # if the rudder goes higher than 35 is starts producing drag
-
-        # max rotation for the rudder in the sim
-        # if sp.world.control.target_gimbal_rudder_angle > 35:
-        #     sp.world.control.target_gimbal_rudder_angle.set(35)
-        #
-        # if sp.world.control.target_gimbal_rudder_angle < -35:
-        #     sp.world.control.target_gimbal_rudder_angle.set(-35)
+            return 0.5 * output
 
     def calculate_proportional(self, error):
         return self.kp * error

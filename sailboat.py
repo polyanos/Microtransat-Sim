@@ -6,6 +6,7 @@ import pid as pid
 import pid_sail as pids
 import time
 
+
 # to run python world.py
 # need to manually change wind direction currently
 
@@ -13,9 +14,8 @@ import time
 # some functions will be made into their own files
 # some functions need changing/missing
 
-#WIP
+# WIP
 class Compass_direction(Enum):
-
     NORTH = 0
     EAST = 90
     SOUTH = 180
@@ -27,7 +27,6 @@ def is_between_angles(n, a, b):
     if a < b:
         return a <= n <= b
     return a <= n or n <= b
-
 
 
 def is_sailing_against_wind(min_threshold,
@@ -58,7 +57,7 @@ def is_sailing_against_wind(min_threshold,
     return False
 
 
-class Sailboat (sp.Module):
+class Sailboat(sp.Module):
     def __init__(self):
         sp.Module.__init__(self)
 
@@ -154,11 +153,11 @@ class Sailboat (sp.Module):
 
     def tacking(self):
 
-        #check if we need to tack left or right
-        #depending on direction +- 90 so we turn 45 degree
-        #tacking will be called if the sum of n of accelaration is higher than current value
-        #need to figure out how to control rudder and sail angles to reach correct position
-        #might need to only change corrected angle to sail to ?
+        # check if we need to tack left or right
+        # depending on direction +- 90 so we turn 45 degree
+        # tacking will be called if the sum of n of accelaration is higher than current value
+        # need to figure out how to control rudder and sail angles to reach correct position
+        # might need to only change corrected angle to sail to ?
         ##big bug bomb potential
 
         print("placeholder")
@@ -218,25 +217,33 @@ class Sailboat (sp.Module):
         self.rotation_speed.set(0.001 * self.gimbal_rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
 
-
         self.delta_time = 0.05
         self.current_time = time.time()
         self.elapsed_time = self.current_time - self.last_time
         self.delta_time_world = sp.world.period
 
-        #WIP
+        # WIP
         # updates PID every delta_time
         # needs checking since it needs to happen without if statement
         # problem probably lies in finetuning/adjusting PID
         if self.elapsed_time > self.delta_time:
-            self.pid_main_output.control(self.corrected_angle, self.delta_time_world)
+            # self.pid_main_output.control(self.corrected_angle, self.delta_time_world)
+
+            sp.world.control.target_gimbal_rudder_angle.set(sp.world.sailboat.target_gimbal_rudder_angle - self.pid_main_output.control(self.corrected_angle,sp.world.sailboat.sailboat_rotation,self.delta_time_world))
+
+
             sp.world.control.target_sail_angle.set(
-                                                    self.pid_sail_output.sail_control(
-                                                        self.sailboat_rotation, sp.world.wind.wind_direction))
-            #print("sail angle?> ", self.target_sail_angle)
-            #print("updating rudder info...", self.delta_time)
+                self.pid_sail_output.sail_control(
+                    self.sailboat_rotation, sp.world.wind.wind_direction))
+            # print("sail angle?> ", self.target_sail_angle)
+            # print("updating rudder info...", self.delta_time)
             self.last_time = self.current_time
 
+        if sp.world.control.target_gimbal_rudder_angle > 35:
+            sp.world.control.target_gimbal_rudder_angle.set(35)
+
+        if sp.world.control.target_gimbal_rudder_angle < -35:
+            sp.world.control.target_gimbal_rudder_angle.set(-35)
         # temporary to be able to adjust KP/KI/KD values while sim is running
         self.pid_main_output.setKp(self.skp)
         self.pid_main_output.setKi(self.ski)
