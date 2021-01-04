@@ -159,7 +159,7 @@ class Sailboat (sp.Module):
         #tacking will be called if the sum of n of accelaration is higher than current value
         #need to figure out how to control rudder and sail angles to reach correct position
         #might need to only change corrected angle to sail to ?
-        #big bug bomb potential
+        ##big bug bomb potential
 
         print("placeholder")
 
@@ -222,13 +222,14 @@ class Sailboat (sp.Module):
         self.delta_time = 0.05
         self.current_time = time.time()
         self.elapsed_time = self.current_time - self.last_time
+        self.delta_time_world = sp.world.period
 
         #WIP
         # updates PID every delta_time
         # needs checking since it needs to happen without if statement
         # problem probably lies in finetuning/adjusting PID
         if self.elapsed_time > self.delta_time:
-            self.pid_main_output.control(self.corrected_angle, sp.world.period)
+            self.pid_main_output.control(self.corrected_angle, self.delta_time_world)
             sp.world.control.target_sail_angle.set(
                                                     self.pid_sail_output.sail_control(
                                                         self.sailboat_rotation, sp.world.wind.wind_direction))
