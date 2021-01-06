@@ -86,7 +86,7 @@ class Visualisation (Scene):
                         )
                 ) +
                 self.gimbal_rudder(
-                    rotation=world.sailboat.gimbal_rudder_angle,
+                    rotation=world.sailboat.rudder_angle,
                     parts=lambda:
                         self.rudder()
                 )
