@@ -9,6 +9,8 @@
 # beta = 90 - hoek van het zeil met de boot
 
 import simpylc as sp
+import multiprocessing.shared_memory as sm
+import shared_memory_list as sml
 
 
 # TODO: better naming
@@ -49,6 +51,8 @@ def is_sailing_against_wind(min_threshold,
 class Sailboat (sp.Module):
     def __init__(self):
         sp.Module.__init__(self)
+
+        self.shared_memory_list = sm.ShareableList(sml.list_values, name=sml.list_name)
 
         self.page('sailboat')
 
@@ -126,3 +130,7 @@ class Sailboat (sp.Module):
 
         self.rotation_speed.set(0.001 * self.rudder_angle * self.forward_velocity)
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
+
+    def output(self):
+        self.shared_memory_list[sml.sailboat_position_x] = self.position_x + 0
+        self.shared_memory_list[sml.sailboat_position_y] = self.position_y + 0
