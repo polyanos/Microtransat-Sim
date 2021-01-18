@@ -1,11 +1,22 @@
 modules:
   - id: "sailboat_rotation"
-    type: "sensor"
+    type: "static_module"
   - id: "wind_direction"
-    type: "sensor"
+    type: "static_module"
   - id: "rudder_rotation"
-    type: "sensor"
+    type: "static_module"
   - id: "sailboat_position_x"
-    type: "sensor"
+    type: "static_module"
   - id: "sailboat_position_y"
-    type: "sensor"
+    type: "static_module"
+waypoints:
+  - x: 1
+    y: 5
+  - x: 5
+    y: 6
+  - x: 10
+    y: 6
+  - x: 10
+    y: 0
+  - x: 5
+    y: 0
