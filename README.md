@@ -23,7 +23,7 @@ python -m venv env
 ```bash
 .\env\Scripts\activate
 ``` 
-4. Install the specified packages that are needed to run this project.
+4. Install the specified library that is required to run this project.
 ```bash
 pip install simpylc
 ``` 
