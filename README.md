@@ -11,17 +11,17 @@
 ### Installation
 
 #### Windows
-1. Clone the repository.
-```bash
-git clone git@github.com:S-Vrijenhoek/Microtransat-Sim.git
-``` 
-2. Create a new virtual environment.
+1. Create a new virtual environment.
 ```bash
 python -m venv env
-``` 
-3. Activate the virtual environment.
+```
+2. Activate the virtual environment.
 ```bash
 .\env\Scripts\activate
+```
+3. Clone the repository.
+```bash
+git clone git@github.com:S-Vrijenhoek/Microtransat-Sim.git
 ``` 
 4. Install the specified library that is required to run this project.
 ```bash
