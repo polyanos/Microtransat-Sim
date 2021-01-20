@@ -5,7 +5,7 @@
 ### Prerequisites
 
 * Python >= 3.8
-* pip
+* Latest version of Pip
 * Simpylc >= 3.8.4
 
 ### Installation
