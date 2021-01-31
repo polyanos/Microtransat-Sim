@@ -58,15 +58,23 @@ class Visualisation (Scene):
         self.wind_vane = Beam(size=(0.5, 0.05, 0.05), center=(0, 0, 1.25), color=wind_vane_color)
         self.wind_vane_pointer = Cone(size=(0.15, 0.15, 0.15), center=(-0.25, 0, 0), axis=(0, 1, 0), angle=-90, color=wind_vane_color)
 
+        self.buoy = Beam(size=(0.5, 0.5, 0.5), color=(1, 0, 0))
+
     def display(self):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 0.5))
 
         self.camera(
-            position=tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 3)),
+            position=tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 10)),
             focus=tEva((world.sailboat.position_x + 0.00001,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.floor()
+
+        self.buoy(position=(1, 5, 0))
+        self.buoy(position=(5, 6, 0))
+        self.buoy(position=(10, 6, 0))
+        self.buoy(position=(10, 0, 0))
+        self.buoy(position=(5, 0, 0))
 
         self.hull(
             position=sailboat_position,

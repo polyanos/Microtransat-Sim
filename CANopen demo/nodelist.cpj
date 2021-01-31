@@ -1,0 +1,10 @@
+[TOPOLOGY]
+NetName=None
+Nodes=0x02
+Node1Present=0x01
+Node1Name=sensor_node
+Node1DCFName=sensor_node.eds
+Node2Present=0x01
+Node2Name=actuator_node
+Node2DCFName=sensor_node.eds
+EDSBaseName=eds

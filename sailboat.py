@@ -11,7 +11,9 @@
 import simpylc as sp
 import multiprocessing.shared_memory as sm
 import shared_memory_list as sml
+from multiprocessing import Lock
 
+lock = Lock()
 
 # TODO: better naming
 def is_between_angles(n, a, b):
@@ -85,10 +87,15 @@ class Sailboat (sp.Module):
         self.rudder_angle = sp.Register(0)
         self.rotation_speed = sp.Register()
 
+    def input(self):
+        self.target_sail_angle.set(self.shared_memory_list[sml.target_sail_angle])
+        self.target_rudder_angle.set(sp.limit(self.shared_memory_list[sml.target_rudder_angle], 35))
+
     def sweep(self):
         # Software Framework
-        self.target_sail_angle.set(sp.world.softwareFramework.optimal_sailing_angle)
-        self.target_rudder_angle.set(sp.limit(sp.world.softwareFramework.optimal_rudder_angle, 35))
+
+        #self.target_sail_angle.set(sp.world.softwareFramework.optimal_sailing_angle)
+        #self.target_rudder_angle.set(sp.limit(sp.world.softwareFramework.optimal_rudder_angle, 35))
 
         self.local_sail_angle.set(self.local_sail_angle - 1, self.local_sail_angle > self.target_sail_angle)
         self.local_sail_angle.set(self.local_sail_angle + 1, self.local_sail_angle < self.target_sail_angle)
@@ -132,5 +139,10 @@ class Sailboat (sp.Module):
         self.sailboat_rotation.set((self.sailboat_rotation - self.rotation_speed) % 360)
 
     def output(self):
+        lock.acquire()
         self.shared_memory_list[sml.sailboat_position_x] = self.position_x + 0
         self.shared_memory_list[sml.sailboat_position_y] = self.position_y + 0
+        self.shared_memory_list[sml.wind_direction] = sp.world.wind.wind_direction + 0
+        self.shared_memory_list[sml.sailboat_rotation] = self.sailboat_rotation + 0
+        self.shared_memory_list[sml.rudder_rotation] = self.rudder_angle + 0
+        lock.release()
