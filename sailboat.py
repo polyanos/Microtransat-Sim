@@ -9,6 +9,7 @@
 # beta = 90 - hoek van het zeil met de boot
 
 from pid import *
+from routeWaypoint import RouteWaypoint
 import simpylc as sp
 
 
@@ -87,6 +88,7 @@ class Sailboat (sp.Module):
         self.position_y = sp.Register()
         self.position_z = sp.Register()
         self.sailboat_rotation = sp.Register()
+        self.startPosition = RouteWaypoint(self.position_x._state, self.position_y._state)
 
         self.group('body')
         self.mass = sp.Register(20)

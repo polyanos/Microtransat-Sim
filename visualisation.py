@@ -1,13 +1,17 @@
 from simpylc import *
 
+from routeWaypoint import RouteWaypoint
+
 normalFloorColor = (0, 0, 1)
 collisionFloorColor = (1, 0, 0.3)
 nrOfObstacles = 64
 
+routeDashLength = 0.1
+
 
 class Floor(Beam):
     side = 64
-    spacing = 0.6
+    spacing = 0.3
     halfSteps = round(0.5 * side / spacing)
 
     class Stripe(Beam):
@@ -62,23 +66,26 @@ class Visualisation (Scene):
         self.wind_vane = Beam(size=(0.05, 0.5, 0.05), center=(0, 0, 1.25), color=wind_vane_color)
         self.wind_vane_pointer = Cone(size=(0.15, 0.15, 0.15), center=(0, 0.25, 0), axis=(1, 0, 0), angle=-90, color=wind_vane_color)
 
+        # Route display
+        route_color = (1, 0, 0)
+        self.routeWaypoint = Beam(size=(routeDashLength, routeDashLength, routeDashLength), center=(0, 0, 0), color=route_color)
+
+
     def display(self):
         sailboat_position = tEva((world.sailboat.position_x,  world.sailboat.position_y, world.sailboat.position_z + 0.5))
 
         self.camera(
-            position=tEva((world.sailboat.position_x, world.sailboat.position_y, world.sailboat.position_z + 10)),
+            position=tEva((world.sailboat.position_x, world.sailboat.position_y, world.sailboat.position_z + 5)),
             focus=tEva((world.sailboat.position_x + 0.00001,  world.sailboat.position_y, world.sailboat.position_z))
         )
 
         self.floor()
 
-        self.waypoint(
-            position=tEva((world.waypoint.waypoint1_x, world.waypoint.waypoint1_y, world.waypoint.waypoint1_z))
-        )
 
-        self.waypoint(
-            position=tEva((world.waypoint.waypoint2_x, world.waypoint.waypoint2_y, world.waypoint.waypoint2_z))
-        )
+        for waypoint in world.waypoint._waypointList:
+            self.waypoint(
+                position=(waypoint.X, waypoint.Y, 0)
+            )
 
         self.hull(
             position=sailboat_position,
@@ -110,3 +117,48 @@ class Visualisation (Scene):
             parts=lambda:
                 self.wind_vane_pointer()
         )
+        
+        self.drawRouteLine(world.waypoint.startPosition, world.waypoint._waypointList, routeDashLength)
+
+    def drawRouteLine(self, startPoint: RouteWaypoint, routeWaypoints: list[RouteWaypoint], dashLength):
+        for waypoint in routeWaypoints:
+            xDifference =  waypoint.X - startPoint.X
+            yDifference = waypoint.Y - startPoint.Y
+            calculateX = True
+            calculateY = True
+
+            #Check if the route is only a vertical or only a horizontal change, and calculate how far the waypoint is.
+            if(xDifference == 0):
+                routeLength = waypoint.Y - startPoint.Y
+                xRatio = 0
+                yRatio = 1
+                calculateX = False
+            elif (yDifference == 0):
+                routeLength = waypoint.X - startPoint.X
+                xRatio = 1
+                yRatio = 0
+                calculateY = False
+            else:
+                routeLength = sqrt(abs(xDifference) ** 2 + abs(yDifference) ** 2)
+                xRatio = xDifference / routeLength
+                yRatio = yDifference / routeLength
+
+            currentLength = 0
+            startX = startPoint.X
+            startY = startPoint.Y
+
+            while(currentLength < routeLength):
+                x = startX
+                y = startY
+                if(calculateX):
+                    x = startX + currentLength * xRatio
+
+                if(calculateY):
+                    y = startY + currentLength * yRatio
+
+                self.routeWaypoint(
+                    position = (x, y, 0)
+                )
+                currentLength += dashLength * 2
+
+            startPoint = waypoint
